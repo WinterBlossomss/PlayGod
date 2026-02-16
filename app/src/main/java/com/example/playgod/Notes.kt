@@ -15,4 +15,11 @@ class Notes {
         set(value) {
             if (value == null || value >= 0) field = value
         }
+
+    constructor() {}
+    constructor(Name: String, Description: String)
+    {
+        this.noteName = Name;
+        this.noteDescr = Description;
+    }
 }
