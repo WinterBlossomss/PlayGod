@@ -10,9 +10,15 @@ class Tags {
         set(value) {
             if (value.isNotEmpty()) field = value
         }
+    var tagCatFK: Int = 0
+        set(value) {
+            if (value >= 0) field = value
+        }
 
     constructor() {}
-    constructor(Name: String) {
+    constructor(ID: Int, Name: String,CatFK : Int) {
+        this.tagIDPK = ID;
         this.tagName = Name;
+        this.tagCatFK = CatFK;
     }
 }

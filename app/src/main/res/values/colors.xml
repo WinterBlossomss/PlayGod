@@ -2,4 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="Celadon">#dee6e0</color>
+    <color name="Aqua">#82e4d0</color>
+    <color name="Blue_Green">#248680</color>
+    <color name="Forest_Green">#1d5450</color>
 </resources>
