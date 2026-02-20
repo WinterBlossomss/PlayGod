@@ -5,9 +5,12 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 
 class NoteDetailFragment : Fragment() {
-
+    private lateinit var tvTitle: TextView
+    private lateinit var tvContent: TextView
+    private lateinit var db: DataBaseHelper
     companion object {
         private const val ARG_NOTE_ID = "note_id"
 

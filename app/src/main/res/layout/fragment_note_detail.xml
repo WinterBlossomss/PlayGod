@@ -1,70 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".NoteDetailFragment">
+    android:layout_height="match_parent">
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/noteCard"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="24dp"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="8dp"
+    <!-- Back Button -->
+
+    <!-- Scrollable Content -->
+    <ImageButton
+        android:id="@+id/buttonBack"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Back"
+        android:src="@drawable/baseline_arrow_back_ios_new_24"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:tint="@android:color/black" />
+
+    <ScrollView
+        android:id="@+id/scrollContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/buttonBack"
+        app:layout_constraintBottom_toTopOf="@id/buttonEdit"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="24dp">
+            android:layout_margin="16dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="6dp">
 
-            <!-- Title Label -->
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Title"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"
-                android:textStyle="bold"/>
+                android:orientation="vertical"
+                android:padding="24dp">
 
-            <!-- Title Input -->
-            <EditText
-                android:id="@+id/editTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Enter title"
-                android:layout_marginTop="8dp"
-                android:inputType="textCapSentences"/>
+                <!-- Title -->
+                <TextView
+                    android:id="@+id/textTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Note Title"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
 
-            <!-- Content Label -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Content"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp"/>
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="16dp"
+                    android:background="#DDDDDD" />
 
-            <!-- Content Input -->
-            <EditText
-                android:id="@+id/editContent"
-                android:layout_width="match_parent"
-                android:layout_height="120dp"
-                android:hint="Enter content"
-                android:layout_marginTop="8dp"
-                android:gravity="top"
-                android:inputType="textMultiLine"/>
+                <!-- Content -->
+                <TextView
+                    android:id="@+id/textContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Note content appears here..."
+                    android:textSize="16sp"
+                    android:lineSpacingExtra="4dp" />
 
-        </LinearLayout>
+            </LinearLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+        </com.google.android.material.card.MaterialCardView>
+
+    </ScrollView>
+
+    <!-- Edit Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonEdit"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="Edit"
+        app:cornerRadius="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

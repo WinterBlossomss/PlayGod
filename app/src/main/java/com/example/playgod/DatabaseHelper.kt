@@ -308,7 +308,90 @@ class DataBaseHelper(context: Context) :
         return result
     }
 
+    fun getNotesByWorld(worldId: Int): List<Notes> {
+        val result = mutableListOf<Notes>()
 
+        readableDatabase.query(
+            NOTE_TABLE_NAME,
+            arrayOf(
+                NOTE_COLUMN_ID,
+                NOTE_COLUMN_TITLE,
+                NOTE_COLUMN_CONTENT,
+                NOTE_COLUMN_BRFDESCR,
+                NOTE_COLUMN_TAGFK,
+                NOTE_COLUMN_WORLDFK
+            ),
+            "$NOTE_COLUMN_WORLDFK = ?",
+            arrayOf(worldId.toString()),
+            null,
+            null,
+            "$NOTE_COLUMN_ID ASC"
+        ).use { c ->
+
+            val idIx = c.getColumnIndexOrThrow(NOTE_COLUMN_ID)
+            val titleIx = c.getColumnIndexOrThrow(NOTE_COLUMN_TITLE)
+            val contentIx = c.getColumnIndexOrThrow(NOTE_COLUMN_CONTENT)
+            val brfdescrIx = c.getColumnIndexOrThrow(NOTE_COLUMN_BRFDESCR)
+            val tagFKIx = c.getColumnIndexOrThrow(NOTE_COLUMN_TAGFK)
+            val worldFKIx = c.getColumnIndexOrThrow(NOTE_COLUMN_WORLDFK)
+
+            while (c.moveToNext()) {
+                val note = Notes().apply {
+                    noteIDPK = c.getInt(idIx)
+                    noteName = c.getString(titleIx)
+                    noteDescr = c.getString(contentIx)
+                    noteBrfDescr = c.getString(brfdescrIx)
+                    noteTagFK = if (c.isNull(tagFKIx)) null else c.getInt(tagFKIx)
+                    noteWorldFK = if (c.isNull(worldFKIx)) null else c.getInt(worldFKIx)
+                }
+                result.add(note)
+            }
+        }
+
+        return result
+    }
+    fun getNotesByTag(tagId: Int, worldId: Int): List<Notes> {
+        val result = mutableListOf<Notes>()
+
+        readableDatabase.query(
+            NOTE_TABLE_NAME,
+            arrayOf(
+                NOTE_COLUMN_ID,
+                NOTE_COLUMN_TITLE,
+                NOTE_COLUMN_CONTENT,
+                NOTE_COLUMN_BRFDESCR,
+                NOTE_COLUMN_TAGFK,
+                NOTE_COLUMN_WORLDFK
+            ),
+            "$NOTE_COLUMN_TAGFK = ? AND $NOTE_COLUMN_WORLDFK = ?",
+            arrayOf(tagId.toString(), worldId.toString()),
+            null,
+            null,
+            "$NOTE_COLUMN_ID ASC"
+        ).use { c ->
+
+            val idIx = c.getColumnIndexOrThrow(NOTE_COLUMN_ID)
+            val titleIx = c.getColumnIndexOrThrow(NOTE_COLUMN_TITLE)
+            val contentIx = c.getColumnIndexOrThrow(NOTE_COLUMN_CONTENT)
+            val brfdescrIx = c.getColumnIndexOrThrow(NOTE_COLUMN_BRFDESCR)
+            val tagFKIx = c.getColumnIndexOrThrow(NOTE_COLUMN_TAGFK)
+            val worldFKIx = c.getColumnIndexOrThrow(NOTE_COLUMN_WORLDFK)
+
+            while (c.moveToNext()) {
+                val note = Notes().apply {
+                    noteIDPK = c.getInt(idIx)
+                    noteName = c.getString(titleIx)
+                    noteDescr = c.getString(contentIx)
+                    noteBrfDescr = c.getString(brfdescrIx)
+                    noteTagFK = if (c.isNull(tagFKIx)) null else c.getInt(tagFKIx)
+                    noteWorldFK = if (c.isNull(worldFKIx)) null else c.getInt(worldFKIx)
+                }
+                result.add(note)
+            }
+        }
+
+        return result
+    }
 
     fun deleteTag(catId: Int): Int {
         return writableDatabase.delete(
@@ -343,7 +426,6 @@ class DataBaseHelper(context: Context) :
             addTag("Deserts",1)
             addTag("Islands",1)
             addTag("Biomes",1)
-            addTag("World",1)
 
             addTag("Characters",2)
             addTag("Historical Figures",2)
@@ -418,7 +500,6 @@ class DataBaseHelper(context: Context) :
             arrayOf(noteId.toString())
         )
     }
-
 
     fun getAllNotes(): List<Notes> {
         val result = mutableListOf<Notes>()

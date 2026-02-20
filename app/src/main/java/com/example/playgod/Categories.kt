@@ -11,9 +11,9 @@ class Categories {
         set(value) {
             if (value.isNotEmpty()) field = value
         }
-    constructor() {}
+    constructor()
     constructor(ID: Int, Name: String) {
-        this.catIDPK = ID;
-        this.catName = Name;
+        this.catIDPK = ID
+        this.catName = Name
     }
 }

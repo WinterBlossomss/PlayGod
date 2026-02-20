@@ -1,4 +1,4 @@
-package com.example.playgod;
+package com.example.playgod
 
 class Tags {
     var tagIDPK: Int = 0
@@ -15,10 +15,10 @@ class Tags {
             if (value >= 0) field = value
         }
 
-    constructor() {}
+    constructor()
     constructor(ID: Int, Name: String,CatFK : Int) {
-        this.tagIDPK = ID;
-        this.tagName = Name;
-        this.tagCatFK = CatFK;
+        this.tagIDPK = ID
+        this.tagName = Name
+        this.tagCatFK = CatFK
     }
 }

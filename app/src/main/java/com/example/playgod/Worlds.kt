@@ -10,9 +10,9 @@ class Worlds {
         set(value) {
             if (value.isNotEmpty()) field = value
         }
-    constructor() {}
+    constructor()
     constructor(ID: Int, Name: String) {
-        this.worldIDPK = ID;
-        this.worldName = Name;
+        this.worldIDPK = ID
+        this.worldName = Name
     }
 }
