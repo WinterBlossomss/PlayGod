@@ -13,16 +13,16 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var db : DataBaseHelper
+    private lateinit var db: DataBaseHelper
 
     var currentWorldId: Int? = null
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,22 +33,21 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        val btnhome: ImageButton = findViewById(R.id.btnHome)
-        btnhome.setOnClickListener {
+
+        val btnHome: ImageButton = findViewById(R.id.btnHome)
+        btnHome.setOnClickListener {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.mainFragmentContainer, MainFragment())
                 .commit()
         }
 
         db = DataBaseHelper(this)
-
         db.createDefaultCats()
         db.addDefaultTags()
         populateSidebar()
-
         setupWorldUI()
 
-        val btnCreateNotes : FloatingActionButton = findViewById(R.id.btnCreateNote)
+        val btnCreateNotes: FloatingActionButton = findViewById(R.id.btnCreateNote)
         btnCreateNotes.setOnClickListener {
             val worldId = currentWorldId
             if (worldId == null) {
@@ -77,32 +76,23 @@ class MainActivity : AppCompatActivity() {
                 layoutParams = LinearLayout.LayoutParams(
                     resources.getDimensionPixelSize(R.dimen.sidebar_icon_size),
                     resources.getDimensionPixelSize(R.dimen.sidebar_icon_size)
-                ).apply {
-                    bottomMargin = 12
-                }
+                ).apply { bottomMargin = 12 }
 
                 setImageResource(db.getCategoryIcon(category.catName))
 
                 val typedValue = TypedValue()
-                theme.resolveAttribute(
-                    android.R.attr.selectableItemBackgroundBorderless,
-                    typedValue,
-                    true
-                )
+                theme.resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, typedValue, true)
                 background = ContextCompat.getDrawable(context, typedValue.resourceId)
 
                 scaleType = ImageView.ScaleType.CENTER_INSIDE
                 contentDescription = category.catName
 
                 setOnClickListener {
-                    val catfrag = CategoryFragment.newInstance(category.catName)
-
                     supportFragmentManager.beginTransaction()
-                        .replace(R.id.mainFragmentContainer, catfrag)
+                        .replace(R.id.mainFragmentContainer, CategoryFragment.newInstance(category.catName))
                         .commit()
                 }
             }
-
             dynamicButtonContainer.addView(button)
         }
     }
@@ -113,14 +103,6 @@ class MainActivity : AppCompatActivity() {
             dynamicButtonContainer.getChildAt(i).isEnabled = enabled
             dynamicButtonContainer.getChildAt(i).alpha = if (enabled) 1f else 0.5f
         }
-    }
-
-    fun openCategoryFragment(category: String) {
-        val fragment = CategoryFragment.newInstance(category)
-
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.mainFragmentContainer, fragment)
-            .commit()
     }
 
     private fun setupWorldUI() {
@@ -134,9 +116,7 @@ class MainActivity : AppCompatActivity() {
             createOnlyBtn.visibility = Button.VISIBLE
             worldContainer.visibility = LinearLayout.GONE
 
-            createOnlyBtn.setOnClickListener {
-                showCreateWorldDialog()
-            }
+            createOnlyBtn.setOnClickListener { showCreateWorldDialog() }
 
             setSidebarEnabled(false)
             currentWorldId = null
@@ -146,7 +126,7 @@ class MainActivity : AppCompatActivity() {
             worldContainer.visibility = LinearLayout.VISIBLE
 
             val spinnerItems = worlds.map { it.worldName }.toMutableList()
-            spinnerItems.add("Create World")
+            spinnerItems.add("+ Create World")
 
             val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerItems)
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -162,27 +142,49 @@ class MainActivity : AppCompatActivity() {
                     position: Int,
                     id: Long
                 ) {
-                    val selected = spinnerItems[position]
-                    if (selected == "Create World") {
+                    if (spinnerItems[position] == "+ Create World") {
                         showCreateWorldDialog()
                     } else {
                         currentWorldId = worlds[position].worldIDPK
                         setSidebarEnabled(true)
-                        Toast.makeText(this@MainActivity, "Selected world: $selected", Toast.LENGTH_SHORT).show()
                     }
                 }
-
                 override fun onNothingSelected(parent: android.widget.AdapterView<*>) {}
             })
 
-            createBtn.setOnClickListener {
-                showCreateWorldDialog()
+            // Long-press spinner to delete the currently selected world
+            spinner.setOnLongClickListener {
+                val selectedPos = spinner.selectedItemPosition
+                if (selectedPos >= 0 && selectedPos < worlds.size) {
+                    val world = worlds[selectedPos]
+                    showDeleteWorldDialog(world)
+                }
+                true
             }
+
+            createBtn.setOnClickListener { showCreateWorldDialog() }
         }
     }
 
+    private fun showDeleteWorldDialog(world: Worlds) {
+        AlertDialog.Builder(this)
+            .setTitle("Delete World")
+            .setMessage("Delete \"${world.worldName}\"? All notes in this world will lose their world association.")
+            .setPositiveButton("Delete") { _, _ ->
+                db.deleteWorld(world.worldIDPK)
+                if (currentWorldId == world.worldIDPK) {
+                    currentWorldId = null
+                    setSidebarEnabled(false)
+                }
+                setupWorldUI() // refresh
+                Toast.makeText(this, "\"${world.worldName}\" deleted", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
     private fun showCreateWorldDialog() {
-        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+        val builder = AlertDialog.Builder(this)
         val input = android.widget.EditText(this)
         input.hint = "Enter world name"
         builder.setTitle("Create New World")

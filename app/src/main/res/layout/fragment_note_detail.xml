@@ -5,9 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Back Button -->
-
-    <!-- Scrollable Content -->
     <ImageButton
         android:id="@+id/buttonBack"
         android:layout_width="40dp"
@@ -26,7 +23,7 @@
         android:layout_height="0dp"
         android:fillViewport="true"
         app:layout_constraintTop_toBottomOf="@id/buttonBack"
-        app:layout_constraintBottom_toTopOf="@id/buttonEdit"
+        app:layout_constraintBottom_toTopOf="@id/buttonDelete"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -43,7 +40,6 @@
                 android:orientation="vertical"
                 android:padding="24dp">
 
-                <!-- Title -->
                 <TextView
                     android:id="@+id/textTitle"
                     android:layout_width="match_parent"
@@ -52,14 +48,12 @@
                     android:textSize="22sp"
                     android:textStyle="bold" />
 
-                <!-- Divider -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginVertical="16dp"
                     android:background="#DDDDDD" />
 
-                <!-- Content -->
                 <TextView
                     android:id="@+id/textContent"
                     android:layout_width="match_parent"
@@ -74,6 +68,19 @@
 
     </ScrollView>
 
+    <!-- Delete Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonDelete"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="Delete"
+        app:cornerRadius="16dp"
+        app:backgroundTint="#B00020"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/buttonEdit"/>
+
     <!-- Edit Button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonEdit"
@@ -83,7 +90,7 @@
         android:text="Edit"
         app:cornerRadius="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/buttonDelete"
         app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
