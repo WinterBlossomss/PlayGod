@@ -38,6 +38,17 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" />
 
+        <!-- HOME BUTTON (STATIC) -->
+        <ImageButton
+            android:id="@+id/btnHelp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginBottom="12dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Help"
+            android:foreground="@drawable/ic_help"
+            android:scaleType="centerInside" />
+
     </LinearLayout>
 
 
