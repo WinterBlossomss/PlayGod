@@ -44,7 +44,6 @@ class MainActivity : AppCompatActivity() {
         db.createDefaultCats()
         db.addDefaultTags()
         populateSidebar()
-
         setupWorldUI()
 
         val btnCreateNotes: FloatingActionButton = findViewById(R.id.btnCreateNote)
