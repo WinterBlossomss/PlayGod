@@ -1,6 +1,7 @@
 package com.example.playgod
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +18,7 @@ class CategoryFragment : Fragment() {
 
     companion object {
         private const val ARG_CATEGORY = "category"
+        private const val TAG = "CategoryFragment"
 
         fun newInstance(category: String): CategoryFragment {
             val fragment = CategoryFragment()
@@ -30,6 +32,7 @@ class CategoryFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         categoryName = arguments?.getString(ARG_CATEGORY)
+        Log.d(TAG, "onCreate: categoryName=$categoryName")
     }
 
     override fun onCreateView(
@@ -53,27 +56,30 @@ class CategoryFragment : Fragment() {
         val categories = db.getAllCats()
         val category = categories.find { it.catName == categoryName }
 
+        Log.d(TAG, "Looking for category '$categoryName'")
+        Log.d(TAG, "All categories: ${categories.map { "${it.catIDPK}:${it.catName}" }}")
+        Log.d(TAG, "Matched category: id=${category?.catIDPK}, name=${category?.catName}")
+
         val tags = if (category != null) {
             db.getTagsByCategory(category.catIDPK)
         } else {
             emptyList()
         }
 
+        Log.d(TAG, "Tags found (${tags.size}): ${tags.map { "${it.tagIDPK}:${it.tagName}" }}")
+
         recyclerView.adapter = TagAdapter(tags) { selectedTag ->
+            Log.d(TAG, "Tag clicked: id=${selectedTag.tagIDPK}, name=${selectedTag.tagName}")
             openNotesFragment(selectedTag)
         }
     }
 
-
     private fun openNotesFragment(tag: Tags) {
-
         val fragment = NotesFragment.newInstance(tag.tagIDPK)
 
         parentFragmentManager.beginTransaction()
             .replace(R.id.mainFragmentContainer, fragment)
-            .addToBackStack(null)   // IMPORTANT for back navigation
+            .addToBackStack(null)
             .commit()
     }
-
-
 }

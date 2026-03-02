@@ -19,10 +19,11 @@ class NoteCreateFragment : Fragment() {
     private lateinit var buttonBack: ImageButton
 
     private lateinit var db: DataBaseHelper
+    private lateinit var allTags: List<Tags>
 
     private var selectedTagId: Int? = null
     private var selectedWorldId: Int? = null
-    private var currentWorldId: Int? = null
+
     companion object {
         private const val ARG_WORLD_ID = "world_id"
 
@@ -35,6 +36,13 @@ class NoteCreateFragment : Fragment() {
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Read worldId from both the argument bundle AND MainActivity as fallback
+        val argWorldId = arguments?.getInt(ARG_WORLD_ID, -1) ?: -1
+        selectedWorldId = if (argWorldId != -1) argWorldId
+        else (activity as? MainActivity)?.currentWorldId
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,18 +51,11 @@ class NoteCreateFragment : Fragment() {
     ): View {
         return inflater.inflate(R.layout.fragment_note_create, container, false)
     }
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        currentWorldId = arguments?.getInt(ARG_WORLD_ID)
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         db = DataBaseHelper(requireContext())
-
-        // Get currently selected world from MainActivity
-        selectedWorldId = (activity as? MainActivity)?.currentWorldId
 
         initViews(view)
         setupTagDropdown()
@@ -71,8 +72,8 @@ class NoteCreateFragment : Fragment() {
     }
 
     private fun setupTagDropdown() {
-        val tags = db.getAllTags()
-        val tagNames = tags.map { it.tagName }
+        allTags = db.getAllTags()
+        val tagNames = allTags.map { it.tagName }
 
         val adapter = ArrayAdapter(
             requireContext(),
@@ -83,8 +84,16 @@ class NoteCreateFragment : Fragment() {
         autoCompleteTag.setAdapter(adapter)
 
         autoCompleteTag.setOnItemClickListener { _, _, position, _ ->
-            selectedTagId = tags[position].tagIDPK
+            selectedTagId = allTags[position].tagIDPK
         }
+    }
+
+    // Resolves the tag ID from whatever is currently typed in the field,
+    // in case the user typed/selected without triggering onItemClickListener.
+    private fun resolveTagId(): Int? {
+        if (selectedTagId != null) return selectedTagId
+        val typed = autoCompleteTag.text.toString().trim()
+        return allTags.firstOrNull { it.tagName.equals(typed, ignoreCase = true) }?.tagIDPK
     }
 
     private fun setupButtons() {
@@ -109,16 +118,21 @@ class NoteCreateFragment : Fragment() {
                 return@setOnClickListener
             }
 
+            val tagId = resolveTagId()
+            if (tagId == null) {
+                Toast.makeText(requireContext(), "Please select a valid tag", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             db.addNote(
                 title = title,
                 content = content,
                 brfdescr = brief,
-                tagId = selectedTagId,
+                tagId = tagId,
                 worldId = selectedWorldId!!
             )
 
             Toast.makeText(requireContext(), "Note saved", Toast.LENGTH_SHORT).show()
-
             parentFragmentManager.popBackStack()
         }
     }
