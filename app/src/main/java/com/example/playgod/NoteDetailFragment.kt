@@ -5,12 +5,16 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
+import com.google.android.material.button.MaterialButton
 
 class NoteDetailFragment : Fragment() {
 
     private lateinit var tvTitle: TextView
     private lateinit var tvContent: TextView
+    private lateinit var buttonBack: ImageButton
+    private lateinit var buttonEdit: MaterialButton
     private lateinit var db: DataBaseHelper
 
     companion object {
@@ -46,13 +50,27 @@ class NoteDetailFragment : Fragment() {
 
         tvTitle = view.findViewById(R.id.textTitle)
         tvContent = view.findViewById(R.id.textContent)
+        buttonBack = view.findViewById(R.id.buttonBack)
+        buttonEdit = view.findViewById(R.id.buttonEdit)
 
         loadNote()
+
+        buttonBack.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
+        buttonEdit.setOnClickListener {
+            val worldId = (activity as? MainActivity)?.currentWorldId ?: 0
+            val fragment = NoteCreateFragment.newInstance(noteId = noteId, worldId = worldId)
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.mainFragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit()
+        }
     }
 
     private fun loadNote() {
         val note = db.getNoteById(noteId)
-
         if (note != null) {
             tvTitle.text = note.noteName
             tvContent.text = note.noteDescr

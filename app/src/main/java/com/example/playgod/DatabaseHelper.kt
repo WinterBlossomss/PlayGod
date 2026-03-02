@@ -264,66 +264,74 @@ class DataBaseHelper(context: Context) :
     }
     // INPUT DEFAULT TAGS
     fun addDefaultTags() {
-        if(getTagCount() == 0)
-        {
-            addTag("Continents",1)
-            addTag("Countries / Realms",1)
-            addTag("Regions",1)
-            addTag("Cities",1)
-            addTag("Towns",1)
-            addTag("Villages",1)
-            addTag("Landmarks",1)
-            addTag("Rivers",1)
-            addTag("Lakes",1)
-            addTag("Seas / Oceans",1)
-            addTag("Mountain Ranges",1)
-            addTag("Forests",1)
-            addTag("Deserts",1)
-            addTag("Islands",1)
-            addTag("Biomes",1)
+        if (getTagCount() == 0) {
+            // Look up category IDs
+            val cats = getAllCats()
+            val geo     = cats.find { it.catName == "Geography & Locations" }?.catIDPK ?: return
+            val people  = cats.find { it.catName == "People & Groups" }?.catIDPK ?: return
+            val culture = cats.find { it.catName == "Culture & Society" }?.catIDPK ?: return
+            val history = cats.find { it.catName == "History & Structure" }?.catIDPK ?: return
+            val politics= cats.find { it.catName == "Politics & Power" }?.catIDPK ?: return
+            val magic   = cats.find { it.catName == "Magic & Technology" }?.catIDPK ?: return
 
-            addTag("Characters",2)
-            addTag("Historical Figures",2)
-            addTag("Rulers",2)
-            addTag("Heroes / Legends",2)
-            addTag("Prominent Families",2)
-            addTag("Dynasties",2)
-            addTag("Noble Houses",2)
-            addTag("Organizations",2)
-            addTag("Factions",2)
-            addTag("Guilds",2)
-            addTag("Orders",2)
+            addTag("Continents", geo)
+            addTag("Countries / Realms", geo)
+            addTag("Regions", geo)
+            addTag("Cities", geo)
+            addTag("Towns", geo)
+            addTag("Villages", geo)
+            addTag("Landmarks", geo)
+            addTag("Rivers", geo)
+            addTag("Lakes", geo)
+            addTag("Seas / Oceans", geo)
+            addTag("Mountain Ranges", geo)
+            addTag("Forests", geo)
+            addTag("Deserts", geo)
+            addTag("Islands", geo)
+            addTag("Biomes", geo)
 
-            addTag("Cultures",3)
-            addTag("Ethnicities",3)
-            addTag("Species / Races",3)
-            addTag("Religions",3)
-            addTag("Deities",3)
-            addTag("Languages",3)
-            addTag("Traditions",3)
-            addTag("Customs",3)
-            addTag("Legal Systems",3)
+            addTag("Characters", people)
+            addTag("Historical Figures", people)
+            addTag("Rulers", people)
+            addTag("Heroes / Legends", people)
+            addTag("Prominent Families", people)
+            addTag("Dynasties", people)
+            addTag("Noble Houses", people)
+            addTag("Organizations", people)
+            addTag("Factions", people)
+            addTag("Guilds", people)
+            addTag("Orders", people)
 
-            addTag("Timeline",4)
-            addTag("Historical Events",4)
-            addTag("Wars",4)
-            addTag("Treaties",4)
-            addTag("Revolutions",4)
-            addTag("Eras",4)
+            addTag("Cultures", culture)
+            addTag("Ethnicities", culture)
+            addTag("Species / Races", culture)
+            addTag("Religions", culture)
+            addTag("Deities", culture)
+            addTag("Languages", culture)
+            addTag("Traditions", culture)
+            addTag("Customs", culture)
+            addTag("Legal Systems", culture)
 
-            addTag("Kingdoms",5)
-            addTag("Empires",5)
-            addTag("Republics",5)
-            addTag("Political Systems",5)
-            addTag("Alliances",5)
-            addTag("Conflicts",5)
+            addTag("Timeline", history)
+            addTag("Historical Events", history)
+            addTag("Wars", history)
+            addTag("Treaties", history)
+            addTag("Revolutions", history)
+            addTag("Eras", history)
 
-            addTag("Magic Systems",6)
-            addTag("Creatures",6)
-            addTag("Artifacts",6)
-            addTag("Technologies",6)
-            addTag("Prophecies",6)
-            addTag("Myths / Legends",6)
+            addTag("Kingdoms", politics)
+            addTag("Empires", politics)
+            addTag("Republics", politics)
+            addTag("Political Systems", politics)
+            addTag("Alliances", politics)
+            addTag("Conflicts", politics)
+
+            addTag("Magic Systems", magic)
+            addTag("Creatures", magic)
+            addTag("Artifacts", magic)
+            addTag("Technologies", magic)
+            addTag("Prophecies", magic)
+            addTag("Myths / Legends", magic)
         }
     }
     // NOTE FUNCTIONS
@@ -337,10 +345,11 @@ class DataBaseHelper(context: Context) :
         }
         return writableDatabase.insert(NOTE_TABLE_NAME, null, values)
     }
-    fun updateNote(noteId: Int, title: String, content: String, tagId: Int?, worldId: Int?): Int {
+    fun updateNote(noteId: Int, title: String, content: String, brfdescr: String = "", tagId: Int?, worldId: Int?): Int {
         val values = ContentValues().apply {
             put(NOTE_COLUMN_TITLE, title)
             put(NOTE_COLUMN_CONTENT, content)
+            if (brfdescr.isNotEmpty()) put(NOTE_COLUMN_BRFDESCR, brfdescr)
             if (tagId != null) put(NOTE_COLUMN_TAGFK, tagId) else putNull(NOTE_COLUMN_TAGFK)
             if (worldId != null) put(NOTE_COLUMN_WORLDFK, worldId) else putNull(NOTE_COLUMN_WORLDFK)
         }

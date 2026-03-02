@@ -8,7 +8,6 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import com.google.android.material.button.MaterialButton
 
-
 class NoteCreateFragment : Fragment() {
 
     private lateinit var editTitle: EditText
@@ -23,13 +22,27 @@ class NoteCreateFragment : Fragment() {
 
     private var selectedTagId: Int? = null
     private var selectedWorldId: Int? = null
+    private var noteId: Int = 0  // 0 = create mode, >0 = edit mode
 
     companion object {
         private const val ARG_WORLD_ID = "world_id"
+        private const val ARG_NOTE_ID = "note_id"
 
+        // Create mode
         fun newInstance(worldId: Int): NoteCreateFragment {
             val fragment = NoteCreateFragment()
             val args = Bundle()
+            args.putInt(ARG_WORLD_ID, worldId)
+            args.putInt(ARG_NOTE_ID, 0)
+            fragment.arguments = args
+            return fragment
+        }
+
+        // Edit mode
+        fun newInstance(noteId: Int, worldId: Int): NoteCreateFragment {
+            val fragment = NoteCreateFragment()
+            val args = Bundle()
+            args.putInt(ARG_NOTE_ID, noteId)
             args.putInt(ARG_WORLD_ID, worldId)
             fragment.arguments = args
             return fragment
@@ -38,7 +51,7 @@ class NoteCreateFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Read worldId from both the argument bundle AND MainActivity as fallback
+        noteId = arguments?.getInt(ARG_NOTE_ID, 0) ?: 0
         val argWorldId = arguments?.getInt(ARG_WORLD_ID, -1) ?: -1
         selectedWorldId = if (argWorldId != -1) argWorldId
         else (activity as? MainActivity)?.currentWorldId
@@ -59,6 +72,11 @@ class NoteCreateFragment : Fragment() {
 
         initViews(view)
         setupTagDropdown()
+
+        if (noteId > 0) {
+            prefillFields()
+        }
+
         setupButtons()
     }
 
@@ -84,12 +102,30 @@ class NoteCreateFragment : Fragment() {
         autoCompleteTag.setAdapter(adapter)
 
         autoCompleteTag.setOnItemClickListener { _, _, position, _ ->
-            selectedTagId = allTags[position].tagIDPK
+            val selectedName = adapter.getItem(position)
+            selectedTagId = allTags.firstOrNull { it.tagName == selectedName }?.tagIDPK
         }
     }
 
-    // Resolves the tag ID from whatever is currently typed in the field,
-    // in case the user typed/selected without triggering onItemClickListener.
+    private fun prefillFields() {
+        val note = db.getNoteById(noteId) ?: return
+
+        editTitle.setText(note.noteName)
+        editContent.setText(note.noteDescr)
+        editBrief.setText(note.noteBrfDescr)
+
+        note.noteTagFK?.let { tagFk ->
+            val tag = allTags.firstOrNull { it.tagIDPK == tagFk }
+            if (tag != null) {
+                autoCompleteTag.setText(tag.tagName, false)
+                selectedTagId = tag.tagIDPK
+            }
+        }
+
+        selectedWorldId = note.noteWorldFK ?: selectedWorldId
+        buttonSave.text = "Update Note"
+    }
+
     private fun resolveTagId(): Int? {
         if (selectedTagId != null) return selectedTagId
         val typed = autoCompleteTag.text.toString().trim()
@@ -103,7 +139,6 @@ class NoteCreateFragment : Fragment() {
         }
 
         buttonSave.setOnClickListener {
-
             val title = editTitle.text.toString().trim()
             val content = editContent.text.toString().trim()
             val brief = editBrief.text.toString().trim()
@@ -124,15 +159,26 @@ class NoteCreateFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            db.addNote(
-                title = title,
-                content = content,
-                brfdescr = brief,
-                tagId = tagId,
-                worldId = selectedWorldId!!
-            )
+            if (noteId > 0) {
+                db.updateNote(
+                    noteId = noteId,
+                    title = title,
+                    content = content,
+                    tagId = tagId,
+                    worldId = selectedWorldId!!
+                )
+                Toast.makeText(requireContext(), "Note updated", Toast.LENGTH_SHORT).show()
+            } else {
+                db.addNote(
+                    title = title,
+                    content = content,
+                    brfdescr = brief,
+                    tagId = tagId,
+                    worldId = selectedWorldId!!
+                )
+                Toast.makeText(requireContext(), "Note saved", Toast.LENGTH_SHORT).show()
+            }
 
-            Toast.makeText(requireContext(), "Note saved", Toast.LENGTH_SHORT).show()
             parentFragmentManager.popBackStack()
         }
     }
