@@ -51,9 +51,13 @@ class NotesFragment : Fragment() {
     }
 
     private fun loadNotes() {
+        val currentWorldId = (activity as? MainActivity)?.currentWorldId
 
-        // No need to fetch all tags again.
-        val notes = db.getNotesByTag(tagId)
+        val notes = if (currentWorldId != null) {
+            db.getNotesByTag(tagId, currentWorldId)
+        } else {
+            db.getNotesByTag(tagId)
+        }
 
         recyclerView.adapter = MyNoteAdapter(notes) { selectedNote ->
             openNoteDetailFragment(selectedNote)

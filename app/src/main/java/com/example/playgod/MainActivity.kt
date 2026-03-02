@@ -1,13 +1,10 @@
 package com.example.playgod
 
 import android.os.Bundle
-import android.view.Display
-import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import android.content.Context
 import android.util.TypedValue
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -17,17 +14,14 @@ import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.coroutines.MainScope
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var db : DataBaseHelper
 
-    private var selectedWorldId: Int? = null
+    var currentWorldId: Int? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,8 +40,6 @@ class MainActivity : AppCompatActivity() {
                 .commit()
         }
 
-
-
         db = DataBaseHelper(this)
 
         db.createDefaultCats()
@@ -58,24 +50,27 @@ class MainActivity : AppCompatActivity() {
 
         val btnCreateNotes : FloatingActionButton = findViewById(R.id.btnCreateNote)
         btnCreateNotes.setOnClickListener {
+            val worldId = currentWorldId
+            if (worldId == null) {
+                Toast.makeText(this, "Please select a world first", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.mainFragmentContainer, NoteCreateFragment())
+                .replace(R.id.mainFragmentContainer, NoteCreateFragment.newInstance(worldId))
+                .addToBackStack(null)
                 .commit()
         }
-
 
         supportFragmentManager.beginTransaction()
             .replace(R.id.mainFragmentContainer, MainFragment())
             .commit()
-
-
     }
 
     fun populateSidebar() {
         val dynamicButtonContainer: LinearLayout = findViewById(R.id.dynamicButtonContainer)
         dynamicButtonContainer.removeAllViews()
 
-        val categories = db.getAllCats() // fetch Categories objects
+        val categories = db.getAllCats()
 
         categories.forEach { category ->
             val button = ImageButton(this).apply {
@@ -105,7 +100,6 @@ class MainActivity : AppCompatActivity() {
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.mainFragmentContainer, catfrag)
                         .commit()
-
                 }
             }
 
@@ -122,14 +116,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun openCategoryFragment(category: String) {
-
         val fragment = CategoryFragment.newInstance(category)
 
         supportFragmentManager.beginTransaction()
             .replace(R.id.mainFragmentContainer, fragment)
             .commit()
     }
-
 
     private fun setupWorldUI() {
         val worlds = db.getAllWorlds()
@@ -139,7 +131,6 @@ class MainActivity : AppCompatActivity() {
         val createOnlyBtn: Button = findViewById(R.id.btnCreateWorldOnly)
 
         if (worlds.isEmpty()) {
-            // No worlds, show only create button
             createOnlyBtn.visibility = Button.VISIBLE
             worldContainer.visibility = LinearLayout.GONE
 
@@ -147,25 +138,21 @@ class MainActivity : AppCompatActivity() {
                 showCreateWorldDialog()
             }
 
-            // Disable sidebar until a world is created
             setSidebarEnabled(false)
-            selectedWorldId = null
+            currentWorldId = null
 
         } else {
-            // Worlds exist, show spinner + create button
             createOnlyBtn.visibility = Button.GONE
             worldContainer.visibility = LinearLayout.VISIBLE
 
-            // Prepare spinner data
             val spinnerItems = worlds.map { it.worldName }.toMutableList()
-            spinnerItems.add("Create World") // last item is create option
+            spinnerItems.add("Create World")
 
             val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerItems)
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinner.adapter = adapter
 
-            // Initially, no world selected
-            selectedWorldId = null
+            currentWorldId = null
             setSidebarEnabled(false)
 
             spinner.setOnItemSelectedListener(object : android.widget.AdapterView.OnItemSelectedListener {
@@ -179,7 +166,7 @@ class MainActivity : AppCompatActivity() {
                     if (selected == "Create World") {
                         showCreateWorldDialog()
                     } else {
-                        selectedWorldId = worlds[position].worldIDPK
+                        currentWorldId = worlds[position].worldIDPK
                         setSidebarEnabled(true)
                         Toast.makeText(this@MainActivity, "Selected world: $selected", Toast.LENGTH_SHORT).show()
                     }
@@ -193,6 +180,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     private fun showCreateWorldDialog() {
         val builder = androidx.appcompat.app.AlertDialog.Builder(this)
         val input = android.widget.EditText(this)
@@ -203,7 +191,7 @@ class MainActivity : AppCompatActivity() {
                 val name = input.text.toString()
                 if (name.isNotBlank()) {
                     db.addWorld(name)
-                    setupWorldUI() // refresh UI
+                    setupWorldUI()
                     dialog.dismiss()
                 } else {
                     Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_SHORT).show()
@@ -213,4 +201,3 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 }
-
