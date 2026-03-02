@@ -8,9 +8,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 
 class NoteDetailFragment : Fragment() {
+
     private lateinit var tvTitle: TextView
     private lateinit var tvContent: TextView
     private lateinit var db: DataBaseHelper
+
     companion object {
         private const val ARG_NOTE_ID = "note_id"
 
@@ -28,13 +30,32 @@ class NoteDetailFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         noteId = arguments?.getInt(ARG_NOTE_ID) ?: 0
+        db = DataBaseHelper(requireContext())
     }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         return inflater.inflate(R.layout.fragment_note_detail, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        tvTitle = view.findViewById(R.id.textTitle)
+        tvContent = view.findViewById(R.id.textContent)
+
+        loadNote()
+    }
+
+    private fun loadNote() {
+        val note = db.getNoteById(noteId)
+
+        if (note != null) {
+            tvTitle.text = note.noteName
+            tvContent.text = note.noteDescr
+        }
     }
 }

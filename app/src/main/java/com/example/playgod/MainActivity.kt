@@ -19,11 +19,12 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.MainScope
 
 
 class MainActivity : AppCompatActivity() {
-    p
+
     private lateinit var db : DataBaseHelper
 
     private var selectedWorldId: Int? = null
@@ -54,6 +55,13 @@ class MainActivity : AppCompatActivity() {
         populateSidebar()
 
         setupWorldUI()
+
+        val btnCreateNotes : FloatingActionButton = findViewById(R.id.btnCreateNote)
+        btnCreateNotes.setOnClickListener {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.mainFragmentContainer, NoteCreateFragment())
+                .commit()
+        }
 
 
         supportFragmentManager.beginTransaction()

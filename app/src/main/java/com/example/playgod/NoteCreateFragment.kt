@@ -1,59 +1,125 @@
 package com.example.playgod
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.*
+import androidx.fragment.app.Fragment
+import com.google.android.material.button.MaterialButton
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [NoteCreateFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class NoteCreateFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    private lateinit var editTitle: EditText
+    private lateinit var editContent: EditText
+    private lateinit var editBrief: EditText
+    private lateinit var autoCompleteTag: AutoCompleteTextView
+    private lateinit var buttonSave: MaterialButton
+    private lateinit var buttonBack: ImageButton
+
+    private lateinit var db: DataBaseHelper
+
+    private var selectedTagId: Int? = null
+    private var selectedWorldId: Int? = null
+    private var currentWorldId: Int? = null
+    companion object {
+        private const val ARG_WORLD_ID = "world_id"
+
+        fun newInstance(worldId: Int): NoteCreateFragment {
+            val fragment = NoteCreateFragment()
+            val args = Bundle()
+            args.putInt(ARG_WORLD_ID, worldId)
+            fragment.arguments = args
+            return fragment
         }
     }
 
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
+    ): View {
         return inflater.inflate(R.layout.fragment_note_create, container, false)
     }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        currentWorldId = arguments?.getInt(ARG_WORLD_ID)
+    }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment NoteCreateFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            NoteCreateFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        db = DataBaseHelper(requireContext())
+
+        // Get currently selected world from MainActivity
+        selectedWorldId = (activity as? MainActivity)?.currentWorldId
+
+        initViews(view)
+        setupTagDropdown()
+        setupButtons()
+    }
+
+    private fun initViews(view: View) {
+        editTitle = view.findViewById(R.id.editTitle)
+        editContent = view.findViewById(R.id.editContent)
+        editBrief = view.findViewById(R.id.editBriefDescription)
+        autoCompleteTag = view.findViewById(R.id.autoCompleteTag)
+        buttonSave = view.findViewById(R.id.buttonSave)
+        buttonBack = view.findViewById(R.id.buttonBack)
+    }
+
+    private fun setupTagDropdown() {
+        val tags = db.getAllTags()
+        val tagNames = tags.map { it.tagName }
+
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            tagNames
+        )
+
+        autoCompleteTag.setAdapter(adapter)
+
+        autoCompleteTag.setOnItemClickListener { _, _, position, _ ->
+            selectedTagId = tags[position].tagIDPK
+        }
+    }
+
+    private fun setupButtons() {
+
+        buttonBack.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
+        buttonSave.setOnClickListener {
+
+            val title = editTitle.text.toString().trim()
+            val content = editContent.text.toString().trim()
+            val brief = editBrief.text.toString().trim()
+
+            if (title.isEmpty()) {
+                editTitle.error = "Title required"
+                return@setOnClickListener
             }
+
+            if (selectedWorldId == null) {
+                Toast.makeText(requireContext(), "Select a world first", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            db.addNote(
+                title = title,
+                content = content,
+                brfdescr = brief,
+                tagId = selectedTagId,
+                worldId = selectedWorldId!!
+            )
+
+            Toast.makeText(requireContext(), "Note saved", Toast.LENGTH_SHORT).show()
+
+            parentFragmentManager.popBackStack()
+        }
     }
 }
