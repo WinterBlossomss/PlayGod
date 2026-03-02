@@ -5,12 +5,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 class NotesFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
+    private lateinit var tvEmpty: TextView
     private lateinit var db: DataBaseHelper
 
     companion object {
@@ -41,6 +43,7 @@ class NotesFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_notes, container, false)
 
         recyclerView = view.findViewById(R.id.noteRecycleView)
+        tvEmpty = view.findViewById(R.id.tvEmpty)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         db = DataBaseHelper(requireContext())
@@ -51,21 +54,22 @@ class NotesFragment : Fragment() {
     }
 
     private fun loadNotes() {
-        val currentWorldId = (activity as? MainActivity)?.currentWorldId
+        val notes = db.getNotesByTag(tagId)
 
-        val notes = if (currentWorldId != null) {
-            db.getNotesByTag(tagId, currentWorldId)
+        if (notes.isEmpty()) {
+            recyclerView.visibility = View.GONE
+            tvEmpty.visibility = View.VISIBLE
         } else {
-            db.getNotesByTag(tagId)
-        }
+            recyclerView.visibility = View.VISIBLE
+            tvEmpty.visibility = View.GONE
 
-        recyclerView.adapter = MyNoteAdapter(notes) { selectedNote ->
-            openNoteDetailFragment(selectedNote)
+            recyclerView.adapter = MyNoteAdapter(notes) { selectedNote ->
+                openNoteDetailFragment(selectedNote)
+            }
         }
     }
 
     private fun openNoteDetailFragment(note: Notes) {
-
         val fragment = NoteDetailFragment.newInstance(note.noteIDPK)
 
         parentFragmentManager.beginTransaction()

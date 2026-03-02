@@ -5,9 +5,19 @@
     android:layout_height="match_parent"
     tools:context=".NotesFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/noteRecycleView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/noteRecycleView"/>
+        android:layout_height="match_parent"/>
+
+    <TextView
+        android:id="@+id/tvEmpty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="This tag has no notes yet."
+        android:textSize="16sp"
+        android:textColor="#888888"
+        android:visibility="gone"/>
+
 </FrameLayout>

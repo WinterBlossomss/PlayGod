@@ -566,5 +566,42 @@ class DataBaseHelper(context: Context) :
 
         return note
     }
+    fun getRecentNotes(limit: Int = 10, worldId: Int? = null): List<RecentNote> {
+        val result = mutableListOf<RecentNote>()
 
+        // LEFT JOIN so notes without a tag are still included (tag name will be null).
+        // If a worldId is provided, filter to only notes belonging to that world.
+        val worldFilter = if (worldId != null) "WHERE n.$NOTE_COLUMN_WORLDFK = ?" else ""
+        val args = if (worldId != null) arrayOf(worldId.toString(), limit.toString())
+        else arrayOf(limit.toString())
+
+        val query = """
+        SELECT n.$NOTE_COLUMN_ID, n.$NOTE_COLUMN_TITLE, n.$NOTE_COLUMN_BRFDESCR, t.$TAG_COLUMN_TITLE AS tagName
+        FROM $NOTE_TABLE_NAME n
+        LEFT JOIN $TAG_TABLE_NAME t ON n.$NOTE_COLUMN_TAGFK = t.$TAG_COLUMN_ID
+        $worldFilter
+        ORDER BY n.$NOTE_COLUMN_ID DESC
+        LIMIT ?
+    """.trimIndent()
+
+        readableDatabase.rawQuery(query, args).use { c ->
+            val idIx       = c.getColumnIndexOrThrow(NOTE_COLUMN_ID)
+            val titleIx    = c.getColumnIndexOrThrow(NOTE_COLUMN_TITLE)
+            val brfDescrIx = c.getColumnIndexOrThrow(NOTE_COLUMN_BRFDESCR)
+            val tagNameIx  = c.getColumnIndexOrThrow("tagName")
+
+            while (c.moveToNext()) {
+                result.add(
+                    RecentNote(
+                        noteIDPK     = c.getInt(idIx),
+                        noteName     = c.getString(titleIx),
+                        noteBrfDescr = c.getString(brfDescrIx),
+                        tagName      = if (c.isNull(tagNameIx)) null else c.getString(tagNameIx)
+                    )
+                )
+            }
+        }
+
+        return result
+    }
 }
