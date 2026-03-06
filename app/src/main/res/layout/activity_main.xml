@@ -20,16 +20,32 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- HOME BUTTON (STATIC) -->
-        <ImageButton
-            android:id="@+id/btnHome"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_marginBottom="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Home"
-            android:foreground="@drawable/ic_world"
-            android:scaleType="centerInside" />
+        <!-- HOME BUTTON ROW -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <ImageButton
+                android:id="@+id/btnHome"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Home"
+                android:foreground="@drawable/ic_world"
+                android:scaleType="centerInside" />
+
+            <TextView
+                android:id="@+id/labelHome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Home"
+                android:textColor="@android:color/white"
+                android:layout_marginStart="8dp"
+                android:visibility="gone"/>
+        </LinearLayout>
 
         <!-- DYNAMIC BUTTON CONTAINER -->
         <LinearLayout
@@ -38,18 +54,36 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" />
 
-        <!-- HOME BUTTON (STATIC) -->
-        <ImageButton
-            android:id="@+id/btnHelp"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_marginBottom="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Help"
-            android:foreground="@drawable/ic_help"
-            android:scaleType="centerInside" />
+        <!-- HELP BUTTON ROW -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <ImageButton
+                android:id="@+id/btnHelp"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Help"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_help" />
+
+            <TextView
+                android:id="@+id/labelHelp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Help"
+                android:textColor="@android:color/white"
+                android:layout_marginStart="8dp"
+                android:visibility="gone"/>
+        </LinearLayout>
 
     </LinearLayout>
+
+
 
 
     <!-- TOP BAR -->
@@ -106,15 +140,34 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btnCreateNote"
+    <LinearLayout
+        android:id="@+id/fabContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
-        app:srcCompat="@drawable/ic_magic"
-        app:backgroundTint="@color/Forest_Green"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/labelCreateNote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create Note"
+            android:textColor="@color/Forest_Green"
+            android:textStyle="bold"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnCreateNote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_magic"
+            app:backgroundTint="@color/Forest_Green"/>
+
+    </LinearLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

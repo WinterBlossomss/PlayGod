@@ -35,8 +35,8 @@ class MainFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Reload every time the fragment becomes visible so that switching
-        // worlds in the spinner is immediately reflected in the list.
+        //DO NOT REMOVE THIS I BEG
+        //ITS FOR THE LIST UPDATES ON RECENT NOTES
         loadRecentNotes()
     }
 

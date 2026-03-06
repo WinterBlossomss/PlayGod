@@ -12,6 +12,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -20,6 +21,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 class MainActivity : AppCompatActivity() {
 
     private lateinit var db: DataBaseHelper
+    private var labelsVisible = false
 
     var currentWorldId: Int? = null
 
@@ -51,12 +53,19 @@ class MainActivity : AppCompatActivity() {
         btnCreateNotes.setOnClickListener {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.mainFragmentContainer, NoteCreateFragment())
+                .addToBackStack(null) //For fixing overlap
                 .commit()
         }
 
         supportFragmentManager.beginTransaction()
             .replace(R.id.mainFragmentContainer, MainFragment())
             .commit()
+
+        val btnHelp: ImageButton = findViewById(R.id.btnHelp)
+        btnHelp.setOnClickListener {
+            labelsVisible = !labelsVisible
+            toggleLabels()
+        }
     }
 
     fun populateSidebar() {
@@ -66,27 +75,28 @@ class MainActivity : AppCompatActivity() {
         val categories = db.getAllCats()
 
         categories.forEach { category ->
+            // Row container
+            val row = LinearLayout(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { bottomMargin = 12 }
+                orientation = LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+            }
+
+            // Icon button
             val button = ImageButton(this).apply {
                 layoutParams = LinearLayout.LayoutParams(
                     resources.getDimensionPixelSize(R.dimen.sidebar_icon_size),
                     resources.getDimensionPixelSize(R.dimen.sidebar_icon_size)
-                ).apply {
-                    bottomMargin = 12
-                }
-
-                setImageResource(db.getCategoryIcon(category.catName))
-
-                val typedValue = TypedValue()
-                theme.resolveAttribute(
-                    android.R.attr.selectableItemBackgroundBorderless,
-                    typedValue,
-                    true
                 )
+                setImageResource(db.getCategoryIcon(category.catName))
+                val typedValue = TypedValue()
+                theme.resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, typedValue, true)
                 background = ContextCompat.getDrawable(context, typedValue.resourceId)
-
                 scaleType = ImageView.ScaleType.CENTER_INSIDE
                 contentDescription = category.catName
-
                 setOnClickListener {
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.mainFragmentContainer, CategoryFragment.newInstance(category.catName))
@@ -94,15 +104,55 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            dynamicButtonContainer.addView(button)
+            // Label
+            val label = TextView(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { marginStart = 8 }
+                text = category.catName
+                setTextColor(ContextCompat.getColor(context, android.R.color.white))
+                textSize = 12f
+                visibility = if (labelsVisible) android.view.View.VISIBLE else android.view.View.GONE
+            }
+
+            row.addView(button)
+            row.addView(label)
+            dynamicButtonContainer.addView(row)
+        }
+    }
+
+    private fun toggleLabels() {
+        val visibility = if (labelsVisible) android.view.View.VISIBLE else android.view.View.GONE
+        val openedPx = resources.getDimensionPixelSize(if (labelsVisible) R.dimen.label_opened else R.dimen.label_closed)
+
+        findViewById<TextView>(R.id.labelHome).visibility = visibility
+        findViewById<TextView>(R.id.labelHelp).visibility = visibility
+        findViewById<TextView>(R.id.labelCreateNote).visibility = visibility
+
+        val sidebar = findViewById<LinearLayout>(R.id.sidebarContainer)
+        sidebar.layoutParams = sidebar.layoutParams.also { it.width = openedPx }
+
+        // Toggle labels in existing rows directly instead of rebuilding
+        val dynamicButtonContainer: LinearLayout = findViewById(R.id.dynamicButtonContainer)
+        for (i in 0 until dynamicButtonContainer.childCount) {
+            val row = dynamicButtonContainer.getChildAt(i)
+            if (row is LinearLayout) {
+                row.getChildAt(1)?.visibility = visibility
+            }
         }
     }
 
     private fun setSidebarEnabled(enabled: Boolean) {
         val dynamicButtonContainer: LinearLayout = findViewById(R.id.dynamicButtonContainer)
         for (i in 0 until dynamicButtonContainer.childCount) {
-            dynamicButtonContainer.getChildAt(i).isEnabled = enabled
-            dynamicButtonContainer.getChildAt(i).alpha = if (enabled) 1f else 0.5f
+            val row = dynamicButtonContainer.getChildAt(i)
+            row.isEnabled = enabled
+            row.alpha = if (enabled) 1f else 0.5f
+            // Also disable the button inside the row
+            if (row is LinearLayout) {
+                row.getChildAt(0)?.isEnabled = enabled
+            }
         }
     }
 
@@ -134,10 +184,9 @@ class MainActivity : AppCompatActivity() {
         } else {
             createOnlyBtn.visibility = Button.GONE
             worldContainer.visibility = LinearLayout.VISIBLE
+            createBtn.visibility = Button.GONE
 
-            // "Select a world..." sits at position 0 and is never a real world.
-            // This means onItemSelected firing at position 0 on startup is harmless —
-            // no world gets set and the sidebar stays locked.
+            // "Select a world..." sits at position 0 and is never a real world - forces you to choose a world to unlock sidebar
             val spinnerItems = mutableListOf("Select a world...")
             spinnerItems.addAll(worlds.map { it.worldName })
             spinnerItems.add("+ Create World")
@@ -164,7 +213,7 @@ class MainActivity : AppCompatActivity() {
                             setSidebarEnabled(false)
                         }
 
-                        // Last item is the create sentinel
+                        // Last item is the create button
                         spinnerItems[position] == "+ Create World" -> {
                             showCreateWorldDialog()
                         }
@@ -187,6 +236,28 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onNothingSelected(parent: android.widget.AdapterView<*>) {}
+            }
+
+            spinner.setOnLongClickListener {
+                val position = spinner.selectedItemPosition
+                // Only allow delete on real worlds (not prompt at 0 or "+ Create World")
+                if (position > 0 && spinnerItems[position] != "+ Create World") {
+                    val world = worlds[position - 1]
+                    androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle("Delete World")
+                        .setMessage("Are you sure you want to delete \"${world.worldName}\"?")
+                        .setPositiveButton("Delete") { dialog, _ ->
+                            db.deleteWorld(world.worldIDPK)
+                            if (currentWorldId == world.worldIDPK) {
+                                currentWorldId = null
+                            }
+                            setupWorldUI()
+                            dialog.dismiss()
+                        }
+                        .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+                        .show()
+                }
+                true
             }
 
             createBtn.setOnClickListener {
