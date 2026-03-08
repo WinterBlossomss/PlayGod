@@ -163,6 +163,7 @@ class NoteCreateFragment : Fragment() {
                 db.updateNote(
                     noteId = noteId,
                     title = title,
+                    brfdescr = brief,
                     content = content,
                     tagId = tagId,
                     worldId = selectedWorldId!!

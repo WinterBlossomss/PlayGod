@@ -56,16 +56,16 @@ class MainActivity : AppCompatActivity() {
                 .addToBackStack(null) //For fixing overlap
                 .commit()
         }
-
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.mainFragmentContainer, MainFragment())
-            .commit()
-
         val btnHelp: ImageButton = findViewById(R.id.btnHelp)
         btnHelp.setOnClickListener {
             labelsVisible = !labelsVisible
             toggleLabels()
         }
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.mainFragmentContainer, MainFragment())
+            .commit()
+
+
     }
 
     fun populateSidebar() {
@@ -195,7 +195,7 @@ class MainActivity : AppCompatActivity() {
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinner.adapter = adapter
 
-            // Always reset to the prompt on setup so nothing is silently active
+            // Reset
             currentWorldId = null
             setSidebarEnabled(false)
 
