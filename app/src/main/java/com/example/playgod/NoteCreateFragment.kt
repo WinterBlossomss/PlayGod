@@ -70,16 +70,20 @@ class NoteCreateFragment : Fragment() {
 
         db = DataBaseHelper(requireContext())
 
+        //gets views and sets up the Tag spinner
         initViews(view)
         setupTagDropdown()
 
+        //if note is in edit mode
         if (noteId > 0) {
             prefillFields()
         }
 
+        //sets up save button depending on edit/save mode
         setupButtons()
     }
 
+    //gets all the views by ID
     private fun initViews(view: View) {
         editTitle = view.findViewById(R.id.editTitle)
         editContent = view.findViewById(R.id.editContent)
@@ -88,7 +92,7 @@ class NoteCreateFragment : Fragment() {
         buttonSave = view.findViewById(R.id.buttonSave)
         buttonBack = view.findViewById(R.id.buttonBack)
     }
-
+    //fills spinner with tags in alphabetical order
     private fun setupTagDropdown() {
         allTags = db.getAllTags()
         val tagNames = allTags.map { it.tagName }
@@ -106,7 +110,7 @@ class NoteCreateFragment : Fragment() {
             selectedTagId = allTags.firstOrNull { it.tagName == selectedName }?.tagIDPK
         }
     }
-
+    //fills Fields if editing
     private fun prefillFields() {
         val note = db.getNoteById(noteId) ?: return
 
@@ -126,12 +130,14 @@ class NoteCreateFragment : Fragment() {
         buttonSave.text = "Update Note"
     }
 
+    //resolves tagID in AutoComplete
     private fun resolveTagId(): Int? {
         if (selectedTagId != null) return selectedTagId
         val typed = autoCompleteTag.text.toString().trim()
         return allTags.firstOrNull { it.tagName.equals(typed, ignoreCase = true) }?.tagIDPK
     }
 
+    //checks if note exists - updates/saves based on noteID
     private fun setupButtons() {
 
         buttonBack.setOnClickListener {

@@ -40,19 +40,21 @@ class NotesFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
+        //get views
         val view = inflater.inflate(R.layout.fragment_notes, container, false)
-
         recyclerView = view.findViewById(R.id.noteRecycleView)
         tvEmpty = view.findViewById(R.id.tvEmpty)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         db = DataBaseHelper(requireContext())
 
+        //load all the notes
         loadNotes()
 
         return view
     }
 
+    //If notes exist - load, else show empty note string
     private fun loadNotes() {
         val notes = db.getNotesByTag(tagId)
 

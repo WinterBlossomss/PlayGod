@@ -50,6 +50,7 @@ class NoteDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //gets all the controls
         tvTitle = view.findViewById(R.id.textTitle)
         tvContent = view.findViewById(R.id.textContent)
         buttonBack = view.findViewById(R.id.buttonBack)
@@ -84,6 +85,7 @@ class NoteDetailFragment : Fragment() {
         }
     }
 
+    //Loads in Title and Description
     private fun loadNote() {
         val note = db.getNoteById(noteId)
         if (note != null) {

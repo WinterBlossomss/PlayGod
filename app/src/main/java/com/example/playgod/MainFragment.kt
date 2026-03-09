@@ -26,6 +26,7 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //gets all views
         recyclerView = view.findViewById(R.id.recentNotesRecyclerView)
         tvNoNotes = view.findViewById(R.id.tvNoNotes)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -39,7 +40,7 @@ class MainFragment : Fragment() {
         //ITS FOR THE LIST UPDATES ON RECENT NOTES
         loadRecentNotes()
     }
-
+    //load recently saved notes, limit of 10
     private fun loadRecentNotes() {
         val worldId = (activity as? MainActivity)?.currentWorldId
 
@@ -58,6 +59,7 @@ class MainFragment : Fragment() {
         }
     }
 
+    //Navigate to NoteDetailFragment
     private fun openNoteDetailFragment(noteId: Int) {
         val fragment = NoteDetailFragment.newInstance(noteId)
 

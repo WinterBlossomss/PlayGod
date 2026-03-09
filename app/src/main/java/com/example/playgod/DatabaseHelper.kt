@@ -35,7 +35,7 @@ private const val CAT_COLUMN_TITLE = "CatName"
 class DataBaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     override fun onCreate(db: SQLiteDatabase) {
-
+        //Create strong tables first
         val createCatsTable = """
             CREATE TABLE $CAT_TABLE_NAME (
                 $CAT_COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -569,8 +569,7 @@ class DataBaseHelper(context: Context) :
     fun getRecentNotes(limit: Int = 10, worldId: Int? = null): List<RecentNote> {
         val result = mutableListOf<RecentNote>()
 
-        // LEFT JOIN so notes without a tag are still included (tag name will be null).
-        // If a worldId is provided, filter to only notes belonging to that world.
+        // Filter to only notes belonging to that worldID
         val worldFilter = if (worldId != null) "WHERE n.$NOTE_COLUMN_WORLDFK = ?" else ""
         val args = if (worldId != null) arrayOf(worldId.toString(), limit.toString())
         else arrayOf(limit.toString())

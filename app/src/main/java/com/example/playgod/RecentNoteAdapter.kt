@@ -18,18 +18,23 @@ class RecentNoteAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        //gets exact note
         val note = noteList[position]
 
         holder.tvTitle.text = note.noteName
 
         // Show tag name if available, otherwise fall back to a placeholder
+        //(Shouldnt be the case because tag name is req)
         holder.tvDescription.text = if (note.tagName != null) {
             "${note.noteBrfDescr}  •  ${note.tagName}"
         } else {
             note.noteBrfDescr
         }
 
-        holder.itemView.setOnClickListener { onItemClick(note) }
+        holder.itemView.setOnClickListener {
+            //in MainFragment
+            onItemClick(note)
+        }
     }
 
     override fun getItemCount(): Int = noteList.size

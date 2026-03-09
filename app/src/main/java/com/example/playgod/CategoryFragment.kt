@@ -40,25 +40,27 @@ class CategoryFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_category, container, false)
 
+        //gets all the views
+        val view = inflater.inflate(R.layout.fragment_category, container, false)
         recyclerView = view.findViewById(R.id.catRecycleView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         db = DataBaseHelper(requireContext())
 
+        //loads all tags in database
         loadTags()
 
         return view
     }
-
+    //Loads all the tags of the category
     private fun loadTags() {
         val categories = db.getAllCats()
         val category = categories.find { it.catName == categoryName }
 
-        Log.d(TAG, "Looking for category '$categoryName'")
-        Log.d(TAG, "All categories: ${categories.map { "${it.catIDPK}:${it.catName}" }}")
-        Log.d(TAG, "Matched category: id=${category?.catIDPK}, name=${category?.catName}")
+//        Log.d(TAG, "Looking for category '$categoryName'")
+//        Log.d(TAG, "All categories: ${categories.map { "${it.catIDPK}:${it.catName}" }}")
+//        Log.d(TAG, "Matched category: id=${category?.catIDPK}, name=${category?.catName}")
 
         val tags = if (category != null) {
             db.getTagsByCategory(category.catIDPK)
@@ -66,14 +68,16 @@ class CategoryFragment : Fragment() {
             emptyList()
         }
 
-        Log.d(TAG, "Tags found (${tags.size}): ${tags.map { "${it.tagIDPK}:${it.tagName}" }}")
+        //Log.d(TAG, "Tags found (${tags.size}): ${tags.map { "${it.tagIDPK}:${it.tagName}" }}")
 
         recyclerView.adapter = TagAdapter(tags) { selectedTag ->
-            Log.d(TAG, "Tag clicked: id=${selectedTag.tagIDPK}, name=${selectedTag.tagName}")
+            //Log.d(TAG, "Tag clicked: id=${selectedTag.tagIDPK}, name=${selectedTag.tagName}")
             openNotesFragment(selectedTag)
         }
     }
 
+
+    //Navigate to NotesFragment (list of all the notes of the tag)
     private fun openNotesFragment(tag: Tags) {
         val fragment = NotesFragment.newInstance(tag.tagIDPK)
 

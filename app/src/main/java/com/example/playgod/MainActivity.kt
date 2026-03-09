@@ -22,7 +22,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var db: DataBaseHelper
     private var labelsVisible = false
-
     var currentWorldId: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,12 +41,15 @@ class MainActivity : AppCompatActivity() {
                 .commit()
         }
 
+        //Database Methods
         db = DataBaseHelper(this)
         db.createDefaultCats()
         db.addDefaultTags()
-        populateSidebar()
 
+
+        populateSidebar()
         setupWorldUI()
+
 
         val btnCreateNotes: FloatingActionButton = findViewById(R.id.btnCreateNote)
         btnCreateNotes.setOnClickListener {
@@ -61,6 +63,8 @@ class MainActivity : AppCompatActivity() {
             labelsVisible = !labelsVisible
             toggleLabels()
         }
+
+        //Fragment Navigation
         supportFragmentManager.beginTransaction()
             .replace(R.id.mainFragmentContainer, MainFragment())
             .commit()
@@ -68,6 +72,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    //Dynamically creates Buttons
     fun populateSidebar() {
         val dynamicButtonContainer: LinearLayout = findViewById(R.id.dynamicButtonContainer)
         dynamicButtonContainer.removeAllViews()
@@ -121,7 +126,7 @@ class MainActivity : AppCompatActivity() {
             dynamicButtonContainer.addView(row)
         }
     }
-
+    //Helper class for "Help" Button
     private fun toggleLabels() {
         val visibility = if (labelsVisible) android.view.View.VISIBLE else android.view.View.GONE
         val openedPx = resources.getDimensionPixelSize(if (labelsVisible) R.dimen.label_opened else R.dimen.label_closed)
@@ -142,7 +147,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
+    //enables/disables sidebars if world is selected/not selected
     private fun setSidebarEnabled(enabled: Boolean) {
         val dynamicButtonContainer: LinearLayout = findViewById(R.id.dynamicButtonContainer)
         for (i in 0 until dynamicButtonContainer.childCount) {
@@ -162,6 +167,7 @@ class MainActivity : AppCompatActivity() {
 //            .commit()
 //    }
 
+    //sets up world spinner/button
     private fun setupWorldUI() {
         val worlds = db.getAllWorlds()
 
@@ -265,7 +271,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
+    //spinner setup
     private fun showCreateWorldDialog() {
         val builder = androidx.appcompat.app.AlertDialog.Builder(this)
         val input = android.widget.EditText(this)

@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+//Adapter for Notes
 class MyNoteAdapter(
     private val noteList: List<Notes>,
     private val onItemClick: (Notes) -> Unit
@@ -17,12 +18,15 @@ class MyNoteAdapter(
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+        //Gets exact note
         val note = noteList[position]
 
         holder.tvTitle.text = note.noteName
         holder.tvDescription.text = note.noteBrfDescr
 
+        //Navigate to Note
         holder.itemView.setOnClickListener {
+            //in NotesFragment
             onItemClick(note)
         }
 
